@@ -1,2 +1,2 @@
 # Classification-of-Galaxies
-Repository for classifying Galaxy types from photos.
+Repository for classifying galaxy types from photos.
