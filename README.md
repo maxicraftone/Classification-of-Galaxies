@@ -10,4 +10,4 @@ Difficulties:
  --> Just use files with ids in the Table
 
 first classifications:
- - smooth or features or star?
+ - smooth or features or star (T01)
