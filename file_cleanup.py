@@ -36,5 +36,8 @@ while True:
 for f in not_in_files:
     hart.drop(hart[hart['dr7objid'] == f].index, inplace=True)
 
+# Shuffle dataset (seed=1)
+hart = hart.sample(frac=1, random_state=1).reset_index()
+
 # Write data to new file
 hart.to_csv('gz2_hart16_cleaned.csv' , index=False)
