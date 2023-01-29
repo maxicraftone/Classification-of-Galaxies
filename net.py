@@ -40,7 +40,7 @@ def train_validation_loop(trainloader: DataLoader, valloader: DataLoader, optimi
             trainloop.set_postfix(loss=training_loss/(i+1))
 
         if backups:
-            save_net(net, filename=net.save_file + '.epoch' + epoch)
+            save_net(net, filename=(net.save_file + '.epoch' + epoch))
 
         #Validation
         net.eval()
