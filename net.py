@@ -24,12 +24,16 @@ def train_validation_loop(trainloader: DataLoader, valloader: DataLoader, optimi
 
         trainloop = tqdm(trainloader)
 
-        for i, (images, labels_t01, labels_t02) in enumerate(trainloop):
+        for i, data in enumerate(trainloop):
+            if len(data) == 3:
+                images, labels, _ = data
+            else:
+                images, labels = data
             optimizer.zero_grad() #Set gradients to zero
             
             predictions = net(images)
 
-            loss = criterion(predictions, labels_t01)
+            loss = criterion(predictions, labels)
             loss.backward()
             
             optimizer.step()
@@ -50,14 +54,18 @@ def train_validation_loop(trainloader: DataLoader, valloader: DataLoader, optimi
 
         testloop = tqdm(valloader)
 
-        for i, (images,labels_t01,labels_t02) in enumerate(testloop):
+        for i, data in enumerate(testloop):
+            if len(data) == 3:
+                images, labels, _ = data
+            else:
+                images, labels = data
             with torch.no_grad():
                 test_predictions = net(images)
                     
-                test_loss += criterion(test_predictions, labels_t01)
+                test_loss += criterion(test_predictions, labels)
                                 
                 _, top_guess = test_predictions.topk(1, dim=1) #Tensor of top guesses for each image
-                guess_correct = top_guess == labels_t01.view(top_guess.shape) #Tensor of booleans for each guess (True: correct guess, False: wrong guess)
+                guess_correct = top_guess == labels.view(top_guess.shape) #Tensor of booleans for each guess (True: correct guess, False: wrong guess)
                 accuracy += torch.mean(guess_correct.type(torch.FloatTensor)) #Calculate mean of booleans (True:=1.0, False:=0.0)
                     
             testloop.set_description(f"> Validation on test data ")
@@ -98,8 +106,11 @@ def save_net(net, filename: str="") -> None:
     else:
         torch.save(net.state_dict(), net.save_file)
 
-def load_net(net, device: str='cpu'):
-    net.load_state_dict(torch.load(net.save_file, map_location=torch.device(device)))
+def load_net(net, filename:str="", device: str='cpu'):
+    if filename != "":
+        net.load_state_dict(torch.load(filename, map_location=torch.device(device)))
+    else:
+        net.load_state_dict(torch.load(net.save_file, map_location=torch.device(device)))
     return net
 
 def validation_loop(testloader: DataLoader, criterion: torch.nn.modules.loss._Loss, net: torch.nn.Module) -> None:
@@ -111,14 +122,18 @@ def validation_loop(testloader: DataLoader, criterion: torch.nn.modules.loss._Lo
 
     testloop = tqdm(testloader)
 
-    for i, (images,labels_t01,labels_t02) in enumerate(testloop):
+    for i, data in enumerate(testloop):
+        if len(data) == 3:
+            images, labels, _ = data
+        else:
+            images, labels = data
         with torch.no_grad():
             test_predictions = net(images)
                 
-            test_loss += criterion(test_predictions, labels_t01)
+            test_loss += criterion(test_predictions, labels)
                             
             _, top_guess = test_predictions.topk(1, dim=1) #Tensor of top guesses for each image
-            guess_correct = top_guess == labels_t01.view(top_guess.shape) #Tensor of booleans for each guess (True: correct guess, False: wrong guess)
+            guess_correct = top_guess == labels.view(top_guess.shape) #Tensor of booleans for each guess (True: correct guess, False: wrong guess)
             accuracy += torch.mean(guess_correct.type(torch.FloatTensor)) #Calculate mean of booleans (True:=1.0, False:=0.0)
                 
         testloop.set_description(f"> Validation on test data ")
